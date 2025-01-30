@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="realtime_cg_hw1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/realtime_cg_hw1" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/Debug" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-m32" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
+					<Add library="lib/Glaux.lib" />
+					<Add library="lib/GLU32.LIB" />
+					<Add library="lib/glui32.lib" />
+					<Add library="lib/glut32.lib" />
+					<Add library="lib/OPENGL32.LIB" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/realtime_cg_hw1" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="-ka 0.2 0.3 0.3 -kd 1 1 0.5 -ks 1 1 1 -sp 30 -pl 5 5 5 0.3 0.3 0.3 -pl -5 -2 5 0.5 0.5 1 -dl 0 1 0 0.5 0.3 0.2 -toon 7 -file" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-m32" />
+					<Add directory="include" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-static-libstdc++" />
+					<Add option="-static-libgcc" />
+					<Add option="-static" />
+					<Add option="-m32" />
+					<Add library="lib/Glaux.lib" />
+					<Add library="lib/GLU32.LIB" />
+					<Add library="lib/glui32.lib" />
+					<Add library="lib/glut32.lib" />
+					<Add library="lib/OPENGL32.LIB" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="algebra3.h" />
+		<Unit filename="main.cpp" />
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,6 @@
+**In include/GL must have stb_image_write.h**
+
+1. "-file" to write jpg image file instead of displaying it on the screen
+2. "-toon [INT]" to apply toon shading with the given shade level
+
+ex. "-ka 0.2 0.3 0.3 -kd 1 1 0.5 -ks 1 1 1 -sp 30 -pl 5 5 5 0.3 0.3 0.3 -pl -5 -2 5 0.5 0.5 1 -dl 0 1 0 0.5 0.3 0.2 -toon 7 -file"

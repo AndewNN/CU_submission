@@ -1,0 +1,73 @@
+# depslib dependency file v1.0
+1421040622 source:c:\users\nut\desktop\realtime_cg_hw1\main.cpp
+	<vector>
+	<iostream>
+	<fstream>
+	<cmath>
+	<windows.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<OpenGL/glu.h>
+	<GL/glut.h>
+	<GL/glu.h>
+	<time.h>
+	<math.h>
+	"algebra3.h"
+
+1421040624 c:\users\nut\desktop\realtime_cg_hw1\include\gl\glut.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1421040624 c:\users\nut\desktop\realtime_cg_hw1\include\gl\gl.h
+
+1421040624 c:\users\nut\desktop\realtime_cg_hw1\include\gl\glu.h
+	<GL/gl.h>
+
+1612151855 c:\users\nut\desktop\realtime_cg_hw1\algebra3.h
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<iostream>
+
+1737947914 source:d:\cu_submission\realtime_cg_physicssim\realtime_cg_hw1\main.cpp
+	<vector>
+	<iostream>
+	<fstream>
+	<cmath>
+	<windows.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<OpenGL/glu.h>
+	<GL/glut.h>
+	<GL/glu.h>
+	<time.h>
+	<math.h>
+	"algebra3.h"
+	<GL/stb_image_write.h>
+
+1421040624 d:\cu_submission\realtime_cg_physicssim\realtime_cg_hw1\include\gl\glut.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1421040624 d:\cu_submission\realtime_cg_physicssim\realtime_cg_hw1\include\gl\gl.h
+
+1421040624 d:\cu_submission\realtime_cg_physicssim\realtime_cg_hw1\include\gl\glu.h
+	<GL/gl.h>
+
+1612151856 d:\cu_submission\realtime_cg_physicssim\realtime_cg_hw1\algebra3.h
+	<stdlib.h>
+	<assert.h>
+	<math.h>
+	<iostream>
+
+1737939931 d:\cu_submission\realtime_cg_physicssim\realtime_cg_hw1\include\gl\stb_image_write.h
+	<stdlib.h>
+	<stdio.h>
+	<stdarg.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<assert.h>
+
