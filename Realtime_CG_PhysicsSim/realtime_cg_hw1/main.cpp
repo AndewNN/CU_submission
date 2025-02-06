@@ -1,6 +1,16 @@
 // Simple OpenGL example for CS184 F06 by Nuttapong Chentanez, modified from sample code for CS184 on Sp06
 // Modified for Realtime-CG class
 
+/*
+1. "-file" to write ppm image file instead of displaying it on the screen
+2. "-toon [INT]" to apply toon shading with the given shade level
+3. "-ellipsoid [FLOAT] [FLOAT] [FLOAT]" to draw ellipsoid with the given radii ratio
+	let r = min(viewport.w, viewport.h)/2 - 10, then the ellipsoid radii are r*ellipsoid_xr, r*ellipsoid_yr, r*ellipsoid_zr
+4. "-anisotropic_d" to apply anisotropic diffuse term but specular term is still isotropic (same)
+
+ex. "-ka 0.2 0.3 0.3 -kd 1 1 0.5 -ks 0.6 0.6 0.6 -sp 30 -pl 5 5 5 0.3 0.3 0.3 -pl -5 -2 5 0.5 0.5 1 -dl 0 1 0 0.5 0.3 0.2 -ellipsoid 1.0 0.7 0.5 -anisotropic_d -toon 7 -file"
+*/
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -83,8 +93,9 @@ vector<Light> lights;
 Viewport	viewport;
 int 		drawX = 0;
 int 		drawY = 0;
-bool 		is_toon = false;
+bool 		is_toon = false, is_ellipsoid = false, is_aniso_diff = false;
 int 		toon_level;
+float 		ellipsoid_xr=1.0f, ellipsoid_yr=1.0f, ellipsoid_zr=1.0f;
 
 void initScene(){
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Clear to black, fully transparent
@@ -119,7 +130,7 @@ void setPixel(int x, int y, GLfloat r, GLfloat g, GLfloat b) {
 	glVertex2f(x+0.5, y+0.5);
 }
 
-vec3 computeShadedColor(vec3 pos) {
+vec3 computeShadedColor(vec3 pos, vec3 normal) {
 
 	// TODO: Your shading code mostly go here
 	vec3 color(0.0f, 0.0f, 0.0f);
@@ -132,14 +143,22 @@ vec3 computeShadedColor(vec3 pos) {
 		} else {
 			L = light.posDir.normalize();
 		}
-		vec3 N = pos;
+		vec3 N = normal.normalize();
 		vec3 R = (2.0f * N * (N * L) - L).normalize();
 		vec3 V = vec3(0.0f, 0.0f, 1.0f);
 		vec3 ambient, diffuse, specular;
 
 		for(int j=0; j<3; j++) {
 			ambient[j] = material.ka[j] * light.color[j];
-			diffuse[j] = material.kd[j] * light.color[j] * max(0.0f, N * L);
+			if (is_aniso_diff){
+				float t1 = 28*material.kd[j] / (23*PI) * (1-material.ks[j]);
+				float t2 = 1 - pow(1 - max(0.0f, N * V/2), 5);
+				float t3 = 1 - pow(1 - max(0.0f, N * L/2), 5);
+				diffuse[j] = t1 * t2 * t3;
+				// printf("%f %f %f %f\n", t1, t2, t3, t4);
+			}
+			else
+				diffuse[j] = material.kd[j] * light.color[j] * max(0.0f, N * L);
 			specular[j] = material.ks[j] * light.color[j] * pow(max(0.0f, R * V), material.sp);
 		}
 
@@ -152,7 +171,7 @@ vec3 computeShadedColor(vec3 pos) {
 			color[j] = t/float(toon_level);
 		}
 	}
-	
+
 	return color;
 
 }
@@ -173,22 +192,27 @@ void myDisplay() {
 	// Start drawing sphere
 	glBegin(GL_POINTS);
 
-	for (int i = -drawRadius; i <= drawRadius; i++) {
-		int width = floor(sqrt((float)(drawRadius*drawRadius-i*i)));
-		for (int j = -width; j <= width; j++) {
+	int drawRadiusX = drawRadius * ellipsoid_xr;
+	int drawRadiusY = drawRadius * ellipsoid_yr;
+	int drawRadiusZ = drawRadius * ellipsoid_zr;
+	float idrawRadiusX = 1.0f / drawRadiusX;
+	float idrawRadiusY = 1.0f / drawRadiusY;
+	float idrawRadiusZ = 1.0f / drawRadiusZ;
 
-			// Calculate the x, y, z of the surface of the sphere
-			float x = j * idrawRadius;
-			float y = i * idrawRadius;
-			float z = sqrtf(1.0f - x*x - y*y);
-			vec3 pos(x,y,z); // Position on the surface of the sphere
-
-			vec3 col = computeShadedColor(pos);
-
-			// Set the red pixel
+	for (int i = -min(drawY, drawRadiusY); i <= min(drawY, drawRadiusY); i++) {
+		int width = floor(sqrt((float)(drawRadiusX*drawRadiusX*(1-((float)i*i)/(drawRadiusY*drawRadiusY)))));
+		for (int j = -min(drawX, width); j <= min(drawX, width); j++) {
+			float x = j * idrawRadiusX;
+			float y = i * idrawRadiusY;
+			float Z = drawRadiusZ * sqrtf(1.0f - x*x - y*y);
+			float z = Z * idrawRadiusZ;
+			vec3 pos(idrawRadius * j, idrawRadius * i, idrawRadius * Z);
+			vec3 normal(idrawRadius*j/ellipsoid_xr*ellipsoid_xr, idrawRadius*i/ellipsoid_yr*ellipsoid_yr, idrawRadius*Z/ellipsoid_zr*ellipsoid_zr);
+			vec3 col = computeShadedColor(pos, normal);
 			setPixel(drawX + j, drawY + i, col.r, col.g, col.b);
 		}
 	}
+
 	glEnd();
 
 	glFlush();
@@ -274,10 +298,20 @@ void parseArguments(int argc, char* argv[]) {
 			is_toon = true;
 			toon_level = atoi(argv[i+1]);
 			i+=2;
+		} else
+		if (strcmp(argv[i], "-ellipsoid") == 0){
+			is_ellipsoid = true;
+			ellipsoid_xr = (float)atof(argv[i+1]);
+			ellipsoid_yr = (float)atof(argv[i+2]);
+			ellipsoid_zr = (float)atof(argv[i+3]);
+			i+=4;
+		} else
+		if (strcmp(argv[i], "-anisotropic_d") == 0){
+			is_aniso_diff = true;
+			i+=1;
 		}
 	}
 }
-
 //****************************************************
 // the usual stuff, nothing exciting here
 //****************************************************
@@ -302,38 +336,46 @@ int main(int argc, char *argv[]) {
 		float ma = -100000.0f;
 		drawX = (int)(viewport.w*0.5f);
 		drawY = (int)(viewport.h*0.5f);
-		for (int i = -drawRadius; i <= drawRadius; i++) {
-			int width = floor(sqrt((float)(drawRadius*drawRadius-i*i)));
-			for (int j = -width; j <= width; j++) {
 
-				// Calculate the x, y, z of the surface of the sphere
-				float x = j * idrawRadius;
-				float y = i * idrawRadius;
-				float z = sqrtf(1.0f - x*x - y*y);
-				vec3 pos(x,y,z); // Position on the surface of the sphere
+		int drawRadiusX = drawRadius * ellipsoid_xr;
+		int drawRadiusY = drawRadius * ellipsoid_yr;
+		int drawRadiusZ = drawRadius * ellipsoid_zr;
+		float idrawRadiusX = 1.0f / drawRadiusX;
+		float idrawRadiusY = 1.0f / drawRadiusY;
+		float idrawRadiusZ = 1.0f / drawRadiusZ;
 
-				vec3 col = computeShadedColor(pos);
+		for (int i = -min(drawY, drawRadiusY); i <= min(drawY, drawRadiusY); i++) {
+			int width = floor(sqrt((float)(drawRadiusX*drawRadiusX*(1-((float)i*i)/(drawRadiusY*drawRadiusY)))));
+			for (int j = -min(drawX, width); j <= min(drawX, width); j++) {
+				float x = j * idrawRadiusX;
+				float y = i * idrawRadiusY;
+				float Z = drawRadiusZ * sqrtf(1.0f - x*x - y*y);
+				float z = Z * idrawRadiusZ;
 
-				// printf("%d %d %d\n", (int)(col.r*255), (int)(col.g*255), (int)(col.b*255));
-				mi = min(mi, min(col.r, min(col.g, col.b)));
-				ma = max(ma, max(col.r, max(col.g, col.b)));
-				// image[((drawY + i)*viewport.w + drawX + j)*3] = (unsigned char)(255.99f*min(1.0f, max(0.0f, col.r)));
-				// image[((drawY + i)*viewport.w + drawX + j)*3+1] = (unsigned char)(255.99f*min(1.0f, max(0.0f, col.g)));
-				// image[((drawY + i)*viewport.w + drawX + j)*3+2] = (unsigned char)(255.99f*min(1.0f, max(0.0f, col.b)));
+				vec3 pos(idrawRadius * j, idrawRadius * i, idrawRadius * Z);
+				vec3 normal(idrawRadius*j/ellipsoid_xr*ellipsoid_xr, idrawRadius*i/ellipsoid_yr*ellipsoid_yr, idrawRadius*Z/ellipsoid_zr*ellipsoid_zr);
+				vec3 col = computeShadedColor(pos, normal);
 
 				image[((viewport.h - 1 - drawY - i)*viewport.w + drawX + j)*3] = (unsigned char)(255.99f*min(1.0f, max(0.0f, col.r)));
 				image[((viewport.h - 1 - drawY - i)*viewport.w + drawX + j)*3+1] = (unsigned char)(255.99f*min(1.0f, max(0.0f, col.g)));
 				image[((viewport.h - 1 - drawY - i)*viewport.w + drawX + j)*3+2] = (unsigned char)(255.99f*min(1.0f, max(0.0f, col.b)));
-				// printf("(%d %d) ",drawX + j, drawY + i);
 			}
 		}
-		// flip image
-		stbi_write_jpg("./output.jpg", viewport.w, viewport.h, 3, &image[0], 100);
-		// printf("mi: %d ma: %d\n", mi, ma);
-		// printf("%f %f\n", mi, ma);
+
+		ofstream ppmFile("output.ppm");
+		ppmFile << "P3\n" << viewport.w << " " << viewport.h << "\n255\n";
+		for (int i = 0; i < viewport.h; i++) {
+			for (int j = 0; j < viewport.w; j++) {
+				ppmFile << (int)image[(i*viewport.w + j)*3] << " " << (int)image[(i*viewport.w + j)*3+1] << " " << (int)image[(i*viewport.w + j)*3+2] << " ";
+			}
+			ppmFile << "\n";
+		}
 		return 0;
 
 	}
+
+
+
 
   	//This initializes glut
   	glutInit(&argc, argv);
