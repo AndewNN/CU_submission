@@ -1,4 +1,7 @@
 1. "-file" to write ppm image file instead of displaying it on the screen
 2. "-toon [INT]" to apply toon shading with the given shade level
+3. "-ellipsoid [FLOAT] [FLOAT] [FLOAT]" to draw ellipsoid with the given radii ratio
+	let r = min(viewport.w, viewport.h)/2 - 10, then the ellipsoid radii are r*ellipsoid_xr, r*ellipsoid_yr, r*ellipsoid_zr
+4. "-anisotropic_d" to apply anisotropic diffuse term but specular term is still isotropic (same)
 
-ex. "-ka 0.2 0.3 0.3 -kd 1 1 0.5 -ks 1 1 1 -sp 30 -pl 5 5 5 0.3 0.3 0.3 -pl -5 -2 5 0.5 0.5 1 -dl 0 1 0 0.5 0.3 0.2 -toon 7 -file"
+ex. "-ka 0.2 0.3 0.3 -kd 1 1 0.5 -ks 0.6 0.6 0.6 -sp 30 -pl 5 5 5 0.3 0.3 0.3 -pl -5 -2 5 0.5 0.5 1 -dl 0 1 0 0.5 0.3 0.2 -ellipsoid 1.0 0.7 0.5 -anisotropic_d -toon 7 -file"
