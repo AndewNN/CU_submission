@@ -90,6 +90,8 @@
         "syncstream": "cpp",
         "filesystem": "cpp",
         "__tree": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "string.h": "c",
+        "glad.h": "c"
     }
 }
